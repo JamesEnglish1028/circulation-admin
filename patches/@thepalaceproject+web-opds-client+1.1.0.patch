@@ -27,3 +27,18 @@ index fe69bff..ec9507e 100644
              React.createElement("ul", { "aria-label": this.props.facetGroup.label + " options", className: "subtle-list" }, this.props.facetGroup.facets.map(function (facet) { return (React.createElement("li", { key: facet.label, className: facet.active ? "active" : undefined },
                  React.createElement(CatalogLink_1.default, { className: "facetLink", collectionUrl: facet.href }, facet.label))); }))));
      };
+diff --git a/node_modules/@thepalaceproject/web-opds-client/lib/utils/book.js b/node_modules/@thepalaceproject/web-opds-client/lib/utils/book.js
+index c8c9946..19ff91c 100644
+--- a/node_modules/@thepalaceproject/web-opds-client/lib/utils/book.js
++++ b/node_modules/@thepalaceproject/web-opds-client/lib/utils/book.js
+@@ -67,7 +67,11 @@ exports.bookMediumSvgMap = {
+     "http://schema.org/Book": {
+         element: React.createElement(dgx_svg_icons_1.BookIcon, { ariaHidden: true, title: "eBook Icon" }),
+         label: "eBook"
+-    }
++    },
++    "http://schema.org/PublicationIssue": {
++        element: React.createElement(dgx_svg_icons_1.BookIcon, { ariaHidden: true, title: "Periodical Icon" }),
++        label: "Periodical"
++    }
+ };

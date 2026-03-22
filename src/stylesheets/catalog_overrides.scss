@@ -410,7 +410,7 @@ $card-gap:  14px;
     // Format badge — replaces the SVG icon with a colored pill
     // svg.book-icon        → "Book"      light blue
     // svg.audio-headphone-icon → "Audiobook" purple
-    // (Periodical has no medium SVG in the opds-client map — no badge shown)
+    // schema:PublicationIssue → "Periodical" amber
     > svg { display: none !important; } // direct SVG fallback — hide
 
     .item-icon {
@@ -446,6 +446,14 @@ $card-gap:  14px;
           content: "Audiobook";
           background: #EDE9FE;  // violet-100
           color: #6D28D9;        // violet-700
+        }
+      }
+
+      .book[data-medium*="PublicationIssue"] & {
+        &::after {
+          content: "Periodical";
+          background: #FEF3C7;
+          color: #B45309;
         }
       }
     }
@@ -1140,6 +1148,18 @@ $list-cover-h: 136px;
   content: "Audiobook" !important;
   background: #EDE9FE !important;
   color: #6D28D9 !important;
+}
+
+// Ensure periodical badge text/colors apply whenever medium indicates PublicationIssue.
+.palace .book[data-medium*="PublicationIssue"] .compact-info .item-icon::after,
+.palace .book[data-medium*="PublicationIssue"] .expanded-info .fields .item-icon::after,
+.palace .book[data-medium*="publicationissue"] .compact-info .item-icon::after,
+.palace .book[data-medium*="publicationissue"] .expanded-info .fields .item-icon::after,
+.palace .book[data-medium*="Periodical"] .compact-info .item-icon::after,
+.palace .book[data-medium*="Periodical"] .expanded-info .fields .item-icon::after {
+  content: "Periodical" !important;
+  background: #FEF3C7 !important;
+  color: #B45309 !important;
 }
 
 // Shared color variables for visibility status indicators

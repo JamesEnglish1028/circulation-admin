@@ -181,6 +181,7 @@ export interface ClassificationData {
 }
 
 export interface InventoryStatistics {
+  [stat: string]: number;
   titles: number;
   availableTitles: number;
   selfHostedTitles: number;

@@ -11,7 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { inventoryKeyToLabelMap } from "./LibraryStats";
+import {
+  getInventoryStatLabel,
+  getMediumLabel,
+  inventoryKeyToLabelMap,
+} from "./LibraryStats";
 import { formatNumber } from "../../utils/sharedFunctions";
 
 const stackId = "collections";
@@ -88,7 +92,7 @@ type chartTooltipData = {
   dataKey: string;
   name?: string;
   value: number | string;
-  color?: string;
+  tone?: "primary" | "secondary";
   perMedium?: OneLevelStatistics;
 };
 
@@ -135,13 +139,13 @@ export const CustomTooltip = ({
   ].map(({ dataKey, name, value }) => {
     const key = dataKey.toString();
     const perMedium = mediumCountsByProperty[key];
-    return { dataKey: key, name, value, color: aboveTheLineColor, perMedium };
+    return { dataKey: key, name, value, tone: "primary", perMedium };
   });
   const aboveTheLineKeys = [
     "name",
     ...aboveTheLine.map(({ dataKey }) => dataKey),
   ];
-  const belowTheLine = Object.entries(chartItem)
+  const belowTheLine: chartTooltipData[] = Object.entries(chartItem)
     .filter(([key]) => !aboveTheLineKeys.includes(key))
     .filter(([key]) => !key.startsWith("_"))
     .map(([dataKey, value]) => {
@@ -149,14 +153,14 @@ export const CustomTooltip = ({
       const perMedium = mediumCountsByProperty[key];
       return {
         dataKey: key,
-        name: inventoryKeyToLabelMap[key],
+        name: getInventoryStatLabel(key),
         value:
           typeof value === "number"
             ? value
             : typeof value === "string"
             ? value
             : "",
-        color: belowTheLineColor,
+        tone: "secondary",
         perMedium,
       };
     });
@@ -167,7 +171,7 @@ export const CustomTooltip = ({
       <div className="customTooltipDetail">
         <h1 className="customTooltipHeading">{collectionName}</h1>
         {renderChartTooltipPayload(aboveTheLine)}
-        <hr style={{ margin: "0.5em 0.5em" }} />
+        <hr className="customTooltipDivider" />
         {renderChartTooltipPayload(belowTheLine)}
       </div>
     </div>
@@ -176,8 +180,13 @@ export const CustomTooltip = ({
 
 const renderChartTooltipPayload = (payload: Partial<chartTooltipData>[]) => {
   return payload.map(
-    ({ dataKey = "", name = "", value = "", color, perMedium = {} }) => (
-      <p key={dataKey} style={{ color }} className="customTooltipItem">
+    ({ dataKey = "", name = "", value = "", tone, perMedium = {} }) => (
+      <p
+        key={dataKey}
+        className={`customTooltipItem ${
+          tone === "secondary" ? "customTooltipItem--secondary" : ""
+        }`.trim()}
+      >
         {!!name && <span>{name}:</span>}
         <span> {formatNumber(value)}</span>
         {perMediumBreakdown(perMedium)}
@@ -189,7 +198,9 @@ const renderChartTooltipPayload = (payload: Partial<chartTooltipData>[]) => {
 const perMediumBreakdown = (perMedium: OneLevelStatistics) => {
   const perMediumLabels = Object.entries(perMedium)
     .filter(([, count]) => count > 0)
-    .map(([medium, count]) => `${medium}: ${formatNumber(count)}`);
+    .map(
+      ([medium, count]) => `${getMediumLabel(medium)}: ${formatNumber(count)}`
+    );
   return (
     !!perMediumLabels.length && (
       <span className="customTooltipMediumBreakdown">

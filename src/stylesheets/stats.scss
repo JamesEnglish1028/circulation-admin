@@ -277,6 +277,10 @@
       text-decoration: none;
     }
 
+    .customTooltipDivider {
+      margin: 0.5em;
+    }
+
     .customTooltipItem {
       margin: 4px 0;
       font-size: 0.875rem;
@@ -292,5 +296,28 @@
         color: var(--text-muted);
       }
     }
+
+    .customTooltipItem--secondary {
+      color: var(--text-muted);
+    }
+  }
+
+  .inventory-by-medium {
+    margin-top: 1.25rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .inventory-medium-section {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-soft-color);
+  }
+
+  .inventory-medium-heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
   }
 }

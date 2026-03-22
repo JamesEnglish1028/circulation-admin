@@ -82,4 +82,37 @@ describe("EntryPointsTabs", () => {
     expect(filter.className).toContain("entry-points-filter--active");
     expect(filter.textContent).toContain("Audiobooks");
   });
+
+  it("derives active tab from current collection URL entrypoint", () => {
+    const staleFacets = [
+      {
+        label: "Ebooks",
+        href:
+          "http://circulation.librarysimplified.org/Lib1/groups/?entrypoint=Book",
+        active: true,
+      },
+      {
+        label: "Audiobooks",
+        href:
+          "http://circulation.librarysimplified.org/Lib1/groups/?entrypoint=Audio",
+        active: false,
+      },
+    ];
+
+    const { container } = render(
+      <RouterContextProvider>
+        <EntryPointsTabs
+          facets={staleFacets}
+          currentCollectionUrl={
+            "http://circulation.librarysimplified.org/Lib1/search/?q=test&entrypoint=Audio"
+          }
+        />
+      </RouterContextProvider>
+    );
+
+    const filters = container.querySelectorAll("a.entry-points-filter");
+    expect(filters).toHaveLength(2);
+    expect(filters[0].className).not.toContain("entry-points-filter--active");
+    expect(filters[1].className).toContain("entry-points-filter--active");
+  });
 });

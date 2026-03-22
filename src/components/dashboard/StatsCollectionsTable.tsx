@@ -1,19 +1,7 @@
 import * as React from "react";
 import { CollectionInventory, InventoryStatistics } from "../../interfaces";
-import { inventoryKeyToLabelMap } from "./LibraryStats";
+import { getInventoryStatLabel, getOrderedInventoryKeys } from "./LibraryStats";
 import { formatNumber } from "../../utils/sharedFunctions";
-
-const inventoryColumns: Array<keyof InventoryStatistics> = [
-  "titles",
-  "availableTitles",
-  "licensedTitles",
-  "meteredLicenseTitles",
-  "unlimitedLicenseTitles",
-  "openAccessTitles",
-  "meteredLicensesOwned",
-  "meteredLicensesAvailable",
-  "selfHostedTitles",
-];
 
 type Props = {
   collections: CollectionInventory[];
@@ -24,6 +12,12 @@ const sortByName = (a: CollectionInventory, b: CollectionInventory) =>
 
 const StatsCollectionsTable = ({ collections }: Props) => {
   const sortedCollections = [...collections].sort(sortByName);
+  const inventoryColumns = getOrderedInventoryKeys(
+    sortedCollections.reduce(
+      (allStats, collection) => ({ ...allStats, ...collection.inventory }),
+      {} as InventoryStatistics
+    )
+  );
 
   return (
     <div className="collections-table-wrapper">
@@ -33,7 +27,7 @@ const StatsCollectionsTable = ({ collections }: Props) => {
             <th scope="col">Collection</th>
             {inventoryColumns.map((column) => (
               <th scope="col" key={column}>
-                {inventoryKeyToLabelMap[column]}
+                {getInventoryStatLabel(column)}
               </th>
             ))}
           </tr>

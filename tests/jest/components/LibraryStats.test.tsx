@@ -120,6 +120,36 @@ describe("LibraryStats", () => {
       expect(invGroup.textContent).toContain("7.8k");
     });
 
+    it("shows periodical-specific medium stats when provided by the backend", () => {
+      const periodicalStats = {
+        ...defaultStats,
+        inventoryByMedium: {
+          "http://schema.org/PublicationIssue": {
+            titles: 12,
+            availableTitles: 11,
+            selfHostedTitles: 0,
+            openAccessTitles: 0,
+            licensedTitles: 12,
+            unlimitedLicenseTitles: 0,
+            meteredLicenseTitles: 12,
+            meteredLicensesOwned: 12,
+            meteredLicensesAvailable: 11,
+            issues: 12,
+            availableIssues: 11,
+          },
+        },
+      };
+
+      const { container } = renderStats({ stats: periodicalStats });
+      const invGroup = container.querySelector(".stat-inventory-reports-group");
+
+      expect(invGroup.textContent).toContain("Periodicals");
+      expect(invGroup.textContent).toContain("Issues");
+      expect(invGroup.textContent).toContain("Available Issues");
+      expect(invGroup.textContent).toContain("12");
+      expect(invGroup.textContent).toContain("11");
+    });
+
     it("shows collections group", () => {
       const { container } = renderStats();
       const collectionsGroup = container.querySelector(

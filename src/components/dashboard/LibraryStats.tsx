@@ -29,6 +29,71 @@ export const inventoryKeyToLabelMap = {
   selfHostedTitles: "Self-Hosted Titles",
 };
 
+export const mediumLabelMap = {
+  "http://schema.org/PublicationIssue": "Periodicals",
+  "http://bib.schema.org/Audiobook": "Audiobooks",
+  "http://schema.org/EBook": "eBooks",
+  "http://schema.org/Book": "Books",
+};
+
+const preferredInventoryKeyOrder = [
+  "titles",
+  "availableTitles",
+  "licensedTitles",
+  "meteredLicenseTitles",
+  "unlimitedLicenseTitles",
+  "openAccessTitles",
+  "meteredLicensesOwned",
+  "meteredLicensesAvailable",
+  "selfHostedTitles",
+];
+
+const titleCaseWord = (value: string) =>
+  value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+
+export const getInventoryStatLabel = (key: string) => {
+  if (inventoryKeyToLabelMap[key]) {
+    return inventoryKeyToLabelMap[key];
+  }
+
+  const label = key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map(titleCaseWord)
+    .join(" ");
+
+  return label || key;
+};
+
+export const getOrderedInventoryKeys = (inventory: Record<string, number>) => {
+  if (!inventory) {
+    return [];
+  }
+
+  const presentKeys = Object.keys(inventory).filter(
+    (key) => typeof inventory[key] === "number"
+  );
+  const preferredKeys = preferredInventoryKeyOrder.filter((key) =>
+    presentKeys.includes(key)
+  );
+  const remainingKeys = presentKeys
+    .filter((key) => !preferredKeys.includes(key))
+    .sort((left, right) => left.localeCompare(right));
+
+  return [...preferredKeys, ...remainingKeys];
+};
+
+export const getMediumLabel = (medium: string) => {
+  if (mediumLabelMap[medium]) {
+    return mediumLabelMap[medium];
+  }
+
+  const tail = medium.split("/").pop() || medium;
+  return tail.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+};
+
 export const ALL_LIBRARIES_HEADING = "Dashboard for All Authorized Libraries";
 
 /** Displays statistics about patrons, licenses, and collections from the server,
@@ -39,6 +104,7 @@ const LibraryStats = ({ stats, library }: LibraryStatsProps) => {
     key: libraryKey,
     collections,
     inventorySummary: inventory,
+    inventoryByMedium,
     patronStatistics: patrons,
   } = stats || {};
 
@@ -94,6 +160,7 @@ const LibraryStats = ({ stats, library }: LibraryStatsProps) => {
               <StatsInventoryGroup
                 library={library}
                 inventory={inventory}
+                inventoryByMedium={inventoryByMedium}
                 inventoryReportsEnabled={inventoryReportRequestEnabled}
               />
             </li>

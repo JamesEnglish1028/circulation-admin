@@ -4,6 +4,23 @@ import { CollectionContainerProps } from "@thepalaceproject/web-opds-client/lib/
 import Collection from "@thepalaceproject/web-opds-client/lib/components/Collection";
 import { FacetData } from "@thepalaceproject/web-opds-client/lib/interfaces";
 
+const cachedFormatFacetsByLibrary: Record<string, FacetData[]> = {};
+
+const getLibraryKey = (url: string): string | null => {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(url, window.location.origin);
+    const part = parsed.pathname.split("/").filter(Boolean)[0];
+    return part || null;
+  } catch (_error) {
+    const part = url.split("?")[0].split("/").filter(Boolean)[0];
+    return part || null;
+  }
+};
+
 /** Wrapper for `EntryPointsTabs`. This component is passed into the
     OPDSCatalog from web-opds-client. */
 export default class EntryPointsContainer extends React.Component<
@@ -21,6 +38,8 @@ export default class EntryPointsContainer extends React.Component<
       collectionCopy && collectionCopy.facetGroups
         ? collectionCopy.facetGroups
         : [];
+    const currentCollectionUrl = collectionCopy?.url || "";
+    const libraryKey = getLibraryKey(currentCollectionUrl);
     const newProps = Object.assign({}, child.props);
 
     let facets = [];
@@ -44,8 +63,13 @@ export default class EntryPointsContainer extends React.Component<
     // the last known non-empty Formats facets.
     if (facets.length) {
       this.lastFormatFacets = facets;
+      if (libraryKey) {
+        cachedFormatFacetsByLibrary[libraryKey] = facets;
+      }
     } else if (this.lastFormatFacets.length) {
       facets = this.lastFormatFacets;
+    } else if (libraryKey && cachedFormatFacetsByLibrary[libraryKey]?.length) {
+      facets = cachedFormatFacetsByLibrary[libraryKey];
     }
 
     collectionCopy.facetGroups = facetGroups;
@@ -55,7 +79,10 @@ export default class EntryPointsContainer extends React.Component<
 
     return (
       <div className="entry-points-tab-container">
-        <EntryPointsTabs facets={facets} />
+        <EntryPointsTabs
+          facets={facets}
+          currentCollectionUrl={currentCollectionUrl}
+        />
         {collection}
       </div>
     );
