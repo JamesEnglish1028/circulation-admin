@@ -69,14 +69,16 @@ diff --git a/node_modules/@thepalaceproject/web-opds-client/lib/OPDSDataAdapter.
 index c8e0024..dcb78ac 100644
 --- a/node_modules/@thepalaceproject/web-opds-client/lib/OPDSDataAdapter.js
 +++ b/node_modules/@thepalaceproject/web-opds-client/lib/OPDSDataAdapter.js
-@@ -118,10 +118,17 @@ function entryToBook(entry, feedUrl) {
+@@ -118,10 +118,19 @@ function entryToBook(entry, feedUrl) {
      if (linkWithAvailability) {
          (availability = linkWithAvailability.availability, holds = linkWithAvailability.holds, copies = linkWithAvailability.copies);
      }
 +    var publicationType = extractPublicationType(entry.unparsed);
-+    var series = entry.series && publicationType
-+        ? Object.assign(Object.assign({}, entry.series), { publicationType: publicationType })
-+        : entry.series;
++    var fallbackSeries = extractSeriesFromRaw(entry.unparsed);
++    var baseSeries = entry.series || fallbackSeries;
++    var series = baseSeries && publicationType
++        ? Object.assign(Object.assign({}, baseSeries), { publicationType: publicationType })
++        : baseSeries;
      return {
          id: entry.id,
          title: entry.title,
@@ -92,11 +94,18 @@ index c8e0024..dcb78ac 100644
 +function extractPublicationType(rawEntry) {
 +    var _a, _b, _c, _d;
 +    var rawSeries = (rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry["schema:Series"]) || (rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry["schema:series"]);
-+    var rawSeriesAttributes = (_a = rawSeries === null || rawSeries === void 0 ? void 0 : rawSeries[0]) === null || _a === void 0 ? void 0 : _a["$"];
++    var rawSeriesNode = Array.isArray(rawSeries) ? rawSeries[0] : rawSeries;
++    var rawSeriesAttributes = (_a = rawSeriesNode === null || rawSeriesNode === void 0 ? void 0 : rawSeriesNode["$"]) !== null && _a !== void 0 ? _a : rawSeriesNode;
 +    var rawPublicationType = ((_b = rawSeriesAttributes === null || rawSeriesAttributes === void 0 ? void 0 : rawSeriesAttributes["simplified:publicationType"]) === null || _b === void 0 ? void 0 : _b.value)
-+        || ((_c = rawSeriesAttributes === null || rawSeriesAttributes === void 0 ? void 0 : rawSeriesAttributes["simplified:publicationtype"]) === null || _c === void 0 ? void 0 : _c.value);
++        || ((_c = rawSeriesAttributes === null || rawSeriesAttributes === void 0 ? void 0 : rawSeriesAttributes["simplified:publicationtype"]) === null || _c === void 0 ? void 0 : _c.value)
++        || (typeof (rawSeriesAttributes === null || rawSeriesAttributes === void 0 ? void 0 : rawSeriesAttributes["simplified:publicationType"]) === "string"
++            ? rawSeriesAttributes["simplified:publicationType"]
++            : undefined)
++        || (typeof (rawSeriesAttributes === null || rawSeriesAttributes === void 0 ? void 0 : rawSeriesAttributes["simplified:publicationtype"]) === "string"
++            ? rawSeriesAttributes["simplified:publicationtype"]
++            : undefined);
 +    if (rawPublicationType) {
-+        return rawPublicationType;
++        return String(rawPublicationType).trim().toLowerCase();
 +    }
 +    var belongsTo = rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry.metadata.belongsTo;
 +    for (var _i = 0, _e = ["magazine", "journal", "newspaper", "periodical", "series"]; _i < _e.length; _i++) {
@@ -106,6 +115,34 @@ index c8e0024..dcb78ac 100644
 +        }
 +    }
 +    return undefined;
++}
++function extractSeriesFromRaw(rawEntry) {
++    var _a, _b, _c, _d;
++    var rawSeries = (rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry["schema:Series"]) || (rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry["schema:series"]);
++    var rawSeriesNode = Array.isArray(rawSeries) ? rawSeries[0] : rawSeries;
++    var rawSeriesAttributes = (_a = rawSeriesNode === null || rawSeriesNode === void 0 ? void 0 : rawSeriesNode["$"]) !== null && _a !== void 0 ? _a : rawSeriesNode;
++    var rawName = rawSeriesAttributes === null || rawSeriesAttributes === void 0 ? void 0 : rawSeriesAttributes.name;
++    var rawIsPartOf = rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry["schema:isPartOf"];
++    var isPartOfNode = Array.isArray(rawIsPartOf) ? rawIsPartOf[0] : rawIsPartOf;
++    var isPartOfName = typeof isPartOfNode === "string"
++        ? isPartOfNode
++        : ((isPartOfNode === null || isPartOfNode === void 0 ? void 0 : isPartOfNode._) || (isPartOfNode === null || isPartOfNode === void 0 ? void 0 : isPartOfNode.name));
++    var name = (_b = rawName !== null && rawName !== void 0 ? rawName : isPartOfName) !== null && _b !== void 0 ? _b : undefined;
++    var rawPositionNode = rawSeriesNode === null || rawSeriesNode === void 0 ? void 0 : rawSeriesNode.position;
++    var positionNode = Array.isArray(rawPositionNode) ? rawPositionNode[0] : rawPositionNode;
++    var rawPosition = typeof positionNode === "string"
++        ? positionNode
++        : ((positionNode === null || positionNode === void 0 ? void 0 : positionNode._) || positionNode);
++    var parsedPosition = rawPosition !== undefined ? Number(rawPosition) : undefined;
++    var position = Number.isFinite(parsedPosition) ? parsedPosition : undefined;
++    var trimmedName = typeof name === "string" ? name.trim() : "";
++    if (!trimmedName && position === undefined) {
++        return undefined;
++    }
++    return {
++        name: (_d = (_c = trimmedName || "Series") !== null && _c !== void 0 ? _c : undefined) !== null && _d !== void 0 ? _d : "",
++        position: position
++    };
 +}
  function entryToLink(entry, feedUrl) {
      var links = entry.links;
@@ -123,3 +160,22 @@ index 282fac1..8573e62 100644
      } | null;
      authors?: string[];
      contributors?: string[];
+
+diff --git a/node_modules/@thepalaceproject/web-opds-client/lib/components/BookDetails.js b/node_modules/@thepalaceproject/web-opds-client/lib/components/BookDetails.js
+index f1d5c5f..f0fd0a1 100644
+--- a/node_modules/@thepalaceproject/web-opds-client/lib/components/BookDetails.js
++++ b/node_modules/@thepalaceproject/web-opds-client/lib/components/BookDetails.js
+@@ -26,10 +26,11 @@ var BookDetails = /** @class */ (function (_super) {
+         return _super !== null && _super.apply(this, arguments) || this;
+     }
+     BookDetails.prototype.render = function () {
+-        var _a;
++        var _a, _b;
+         var fields = this.fields();
+         var medium = (0, book_1.getMedium)(this.props.book);
+-        return (React.createElement("div", { className: "book-details" },
++        var publicationType = (_b = this.props.book.series) === null || _b === void 0 ? void 0 : _b.publicationType;
++        return (React.createElement("div", { className: "book-details", "data-medium": medium || undefined, "data-publication-type": publicationType || undefined },
+             React.createElement("div", { className: "top", lang: this.props.book.language },
+                 React.createElement("div", { className: "cover" },
+                     React.createElement(BookCover_1.default, { book: this.props.book })),

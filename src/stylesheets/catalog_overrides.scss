@@ -440,6 +440,22 @@ $card-gap:  14px;
         line-height: 1.6;
       }
 
+      // Optional subtype pill (e.g. Magazine / Journal / Newspaper)
+      // rendered as a second badge next to the medium badge.
+      &::before {
+        content: none;
+        display: inline-block;
+        font-size: 0.58rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 2px 7px;
+        border-radius: 20px;
+        line-height: 1.6;
+        margin-right: 4px;
+        vertical-align: top;
+      }
+
       // Audiobook pill (purple) — uses data-medium attr set by patched Book.js
       .book[data-medium*="Audiobook"] & {
         &::after {
@@ -1162,32 +1178,106 @@ $list-cover-h: 136px;
   color: #B45309 !important;
 }
 
-.palace .book[data-publication-type="magazine"] .compact-info .item-icon::after,
-.palace .book[data-publication-type="magazine"] .expanded-info .fields .item-icon::after {
+.palace .book .compact-info .item-icon::before,
+.palace .book .expanded-info .fields .item-icon::before {
+  content: none;
+  display: inline-block !important;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 20px;
+  line-height: 1.6;
+  margin-right: 4px;
+  vertical-align: top;
+}
+
+.palace .book[data-publication-type*="magazine"] .compact-info .item-icon::before,
+.palace .book[data-publication-type*="magazine"] .expanded-info .fields .item-icon::before {
   content: "Magazine" !important;
   background: #FEF3C7 !important;
   color: #B45309 !important;
 }
 
-.palace .book[data-publication-type="journal"] .compact-info .item-icon::after,
-.palace .book[data-publication-type="journal"] .expanded-info .fields .item-icon::after {
+.palace .book[data-publication-type*="journal"] .compact-info .item-icon::before,
+.palace .book[data-publication-type*="journal"] .expanded-info .fields .item-icon::before {
   content: "Journal" !important;
   background: #DCFCE7 !important;
   color: #15803D !important;
 }
 
-.palace .book[data-publication-type="newspaper"] .compact-info .item-icon::after,
-.palace .book[data-publication-type="newspaper"] .expanded-info .fields .item-icon::after {
+.palace .book[data-publication-type*="newspaper"] .compact-info .item-icon::before,
+.palace .book[data-publication-type*="newspaper"] .expanded-info .fields .item-icon::before {
   content: "Newspaper" !important;
   background: #E5E7EB !important;
   color: #374151 !important;
 }
 
-.palace .book[data-publication-type="periodical"] .compact-info .item-icon::after,
-.palace .book[data-publication-type="periodical"] .expanded-info .fields .item-icon::after {
+.palace .book[data-publication-type*="periodical"] .compact-info .item-icon::before,
+.palace .book[data-publication-type*="periodical"] .expanded-info .fields .item-icon::before {
   content: "Periodical" !important;
   background: #FEF3C7 !important;
   color: #B45309 !important;
+}
+
+// Book detail page uses .item-icon-container instead of .item-icon.
+.palace .book-details .item-icon-container {
+  list-style: none;
+}
+
+.palace .book-details .item-icon-container svg {
+  display: none !important;
+}
+
+.palace .book-details .item-icon-container::before,
+.palace .book-details .item-icon-container::after {
+  display: inline-block;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 20px;
+  line-height: 1.6;
+  vertical-align: top;
+}
+
+.palace .book-details .item-icon-container::after {
+  content: "Book";
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+
+.palace .book-details .item-icon-container::before {
+  content: none;
+  margin-right: 4px;
+}
+
+.palace .book-details[data-medium*="PublicationIssue"] .item-icon-container::after,
+.palace .book-details[data-medium*="publicationissue"] .item-icon-container::after,
+.palace .book-details[data-medium*="Periodical"] .item-icon-container::after {
+  content: "Periodical";
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.palace .book-details[data-publication-type*="magazine" i] .item-icon-container::before {
+  content: "Magazine";
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.palace .book-details[data-publication-type*="journal" i] .item-icon-container::before {
+  content: "Journal";
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.palace .book-details[data-publication-type*="newspaper" i] .item-icon-container::before {
+  content: "Newspaper";
+  background: #E5E7EB;
+  color: #374151;
 }
 
 // Shared color variables for visibility status indicators

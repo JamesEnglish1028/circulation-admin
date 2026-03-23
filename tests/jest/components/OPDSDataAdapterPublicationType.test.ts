@@ -26,6 +26,71 @@ const makeEntry = ({
   } as any);
 
 describe("OPDSDataAdapter publicationType extraction", () => {
+  it("normalizes OPDS1 publicationType values to lowercase", () => {
+    const entry = makeEntry({
+      unparsed: {
+        "schema:Series": [
+          {
+            $: {
+              "simplified:publicationType": {
+                value: "MAGAZINE",
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const book = entryToBook(entry, "http://localhost/feed");
+
+    expect(book.series).toEqual({
+      name: "American Scientist",
+      position: 170,
+      publicationType: "magazine",
+    });
+  });
+
+  it("extracts publicationType from schema:series object form", () => {
+    const entry = makeEntry({
+      unparsed: {
+        "schema:series": {
+          $: {
+            "simplified:publicationType": "magazine",
+          },
+        },
+      },
+    });
+
+    const book = entryToBook(entry, "http://localhost/feed");
+
+    expect(book.series).toEqual({
+      name: "American Scientist",
+      position: 170,
+      publicationType: "magazine",
+    });
+  });
+
+  it("builds series from raw schema:series when parser series is null", () => {
+    const entry = makeEntry({
+      series: null,
+      unparsed: {
+        "schema:series": {
+          name: "American Scientist",
+          "simplified:publicationType": "magazine",
+          position: "224",
+        },
+      },
+    });
+
+    const book = entryToBook(entry, "http://localhost/feed");
+
+    expect(book.series).toEqual({
+      name: "American Scientist",
+      position: 224,
+      publicationType: "magazine",
+    });
+  });
+
   it("extracts publicationType from OPDS1 schema:Series simplified:publicationType", () => {
     const entry = makeEntry({
       unparsed: {
