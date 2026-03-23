@@ -66,6 +66,92 @@ describe("CatalogPage", () => {
     );
   });
 
+  it("normalizes periodical fulfill book URLs to canonical work URLs", () => {
+    const params = {
+      collectionUrl: "Lib1/collections/featured",
+      bookUrl: "Lib1/works/20832/fulfill/17",
+      tab: null,
+    };
+
+    const { getByTestId } = renderWithProviders(
+      <CatalogPage params={params as any} />
+    );
+    const catalog = getByTestId("opds-catalog");
+
+    expect(catalog.getAttribute("data-book-url")).toBe(
+      `${document.location.origin}/Lib1/works/20832`
+    );
+  });
+
+  it("normalizes bare fulfill-style IDs using collection library context", () => {
+    const params = {
+      collectionUrl: "Lib1/collections/featured",
+      bookUrl: "20832/fulfill/17",
+      tab: null,
+    };
+
+    const { getByTestId } = renderWithProviders(
+      <CatalogPage params={params as any} />
+    );
+    const catalog = getByTestId("opds-catalog");
+
+    expect(catalog.getAttribute("data-book-url")).toBe(
+      `${document.location.origin}/Lib1/works/20832`
+    );
+  });
+
+  it("normalizes bare URN IDs to works/URI/URN paths", () => {
+    const params = {
+      collectionUrl: "Lib1/collections/featured",
+      bookUrl: "urn:emagazines:issue:american_scientist:20250812",
+      tab: null,
+    };
+
+    const { getByTestId } = renderWithProviders(
+      <CatalogPage params={params as any} />
+    );
+    const catalog = getByTestId("opds-catalog");
+
+    expect(catalog.getAttribute("data-book-url")).toBe(
+      `${document.location.origin}/Lib1/works/URI/urn:emagazines:issue:american_scientist:20250812`
+    );
+  });
+
+  it("normalizes works/URI/URN fulfill paths to canonical works/URI/URN", () => {
+    const params = {
+      collectionUrl: "Lib1/collections/featured",
+      bookUrl:
+        "Lib1/works/URI/urn:emagazines:issue:american_scientist:20250812/fulfill/17",
+      tab: null,
+    };
+
+    const { getByTestId } = renderWithProviders(
+      <CatalogPage params={params as any} />
+    );
+    const catalog = getByTestId("opds-catalog");
+
+    expect(catalog.getAttribute("data-book-url")).toBe(
+      `${document.location.origin}/Lib1/works/URI/urn:emagazines:issue:american_scientist:20250812`
+    );
+  });
+
+  it("does not duplicate works segment when bookUrl is already canonical", () => {
+    const params = {
+      collectionUrl: "Lib1/collections/featured",
+      bookUrl: "Lib1/works/20831",
+      tab: null,
+    };
+
+    const { getByTestId } = renderWithProviders(
+      <CatalogPage params={params as any} />
+    );
+    const catalog = getByTestId("opds-catalog");
+
+    expect(catalog.getAttribute("data-book-url")).toBe(
+      `${document.location.origin}/Lib1/works/20831`
+    );
+  });
+
   it("renders WelcomePage when no collectionUrl and no bookUrl", () => {
     const params = { collectionUrl: null, bookUrl: null, tab: null };
     renderWithProviders(<CatalogPage params={params} />);

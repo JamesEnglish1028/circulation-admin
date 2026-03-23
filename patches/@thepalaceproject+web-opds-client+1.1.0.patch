@@ -1,16 +1,38 @@
 diff --git a/node_modules/@thepalaceproject/web-opds-client/lib/components/Book.js b/node_modules/@thepalaceproject/web-opds-client/lib/components/Book.js
-index 20ca174..3e3785f 100644
+index 20ca174..5f7f5ec 100644
 --- a/node_modules/@thepalaceproject/web-opds-client/lib/components/Book.js
 +++ b/node_modules/@thepalaceproject/web-opds-client/lib/components/Book.js
-@@ -45,7 +45,7 @@ var Book = /** @class */ (function (_super) {
+@@ -45,7 +45,13 @@ var Book = /** @class */ (function (_super) {
              : "";
          // Display contributors only if there are no authors.
          var authors = hasAuthors ? (_a = book.authors) === null || _a === void 0 ? void 0 : _a.join(", ") : contributors;
 -        return (React.createElement("div", { className: "book ".concat(showMediaIconClass), lang: book.language },
-+        return (React.createElement("div", { className: "book ".concat(showMediaIconClass), lang: book.language, "data-medium": bookMedium || "" },
-             React.createElement(CatalogLink_1.default, { collectionUrl: this.props.collectionUrl, bookUrl: book.url || book.id, title: book.title },
++        // Fulfillment links can appear as book.url for borrowed items; route details to a stable work URL.
++        var detailBookUrl = ((book.url && book.url.indexOf("/fulfill/") === -1
++            ? book.url
++            : book.id) ||
++            book.url);
++        return (React.createElement("div", { className: "book ".concat(showMediaIconClass), lang: book.language, "data-medium": bookMedium || undefined, "data-publication-type": book.series && book.series.publicationType || undefined },
++            React.createElement(CatalogLink_1.default, { collectionUrl: this.props.collectionUrl, bookUrl: detailBookUrl, title: book.title },
                  React.createElement(BookCover_1.default, { book: book }),
                  React.createElement("div", { className: "compact-info ".concat(showMediaIconClass) },
+@@ -60,7 +66,7 @@ var Book = /** @class */ (function (_super) {
+            React.createElement("div", { className: "expanded-info" },
+                React.createElement("div", { className: "header" },
+                    React.createElement("div", null,
+-                        React.createElement(CatalogLink_1.default, { collectionUrl: this.props.collectionUrl, bookUrl: book.url || book.id, title: book.title },
++                        React.createElement(CatalogLink_1.default, { collectionUrl: this.props.collectionUrl, bookUrl: detailBookUrl, title: book.title },
+                            React.createElement("div", { className: "title" }, book.title)),
+                        book.series && book.series.name && (React.createElement("div", { className: "series" }, book.series.name)),
+                        (hasAuthors || hasContributors) && (React.createElement("div", { className: "authors" },
+@@ -79,7 +85,7 @@ var Book = /** @class */ (function (_super) {
+                                field.value)) : null;
+                        })),
+                    React.createElement("div", { className: "summary", lang: book.language },
+-                        React.createElement("span", { dangerouslySetInnerHTML: { __html: summary } }),
+-                        React.createElement(CatalogLink_1.default, { collectionUrl: this.props.collectionUrl, bookUrl: book.url || book.id, title: book.title }, "\u2026 More"))))));
++                        React.createElement("span", { dangerouslySetInnerHTML: { __html: summary } }),
++                        React.createElement(CatalogLink_1.default, { collectionUrl: this.props.collectionUrl, bookUrl: detailBookUrl, title: book.title }, "\u2026 More"))))));
 diff --git a/node_modules/@thepalaceproject/web-opds-client/lib/components/FacetGroup.js b/node_modules/@thepalaceproject/web-opds-client/lib/components/FacetGroup.js
 index fe69bff..ec9507e 100644
 --- a/node_modules/@thepalaceproject/web-opds-client/lib/components/FacetGroup.js
@@ -42,3 +64,62 @@ index c8c9946..19ff91c 100644
 +        label: "Periodical"
 +    }
  };
+
+diff --git a/node_modules/@thepalaceproject/web-opds-client/lib/OPDSDataAdapter.js b/node_modules/@thepalaceproject/web-opds-client/lib/OPDSDataAdapter.js
+index c8e0024..dcb78ac 100644
+--- a/node_modules/@thepalaceproject/web-opds-client/lib/OPDSDataAdapter.js
++++ b/node_modules/@thepalaceproject/web-opds-client/lib/OPDSDataAdapter.js
+@@ -118,10 +118,17 @@ function entryToBook(entry, feedUrl) {
+     if (linkWithAvailability) {
+         (availability = linkWithAvailability.availability, holds = linkWithAvailability.holds, copies = linkWithAvailability.copies);
+     }
++    var publicationType = extractPublicationType(entry.unparsed);
++    var series = entry.series && publicationType
++        ? Object.assign(Object.assign({}, entry.series), { publicationType: publicationType })
++        : entry.series;
+     return {
+         id: entry.id,
+         title: entry.title,
+-        series: entry.series,
++        series: series,
+         authors: authors,
+         contributors: contributors,
+         subtitle: entry.subtitle,
+@@ -140,6 +147,24 @@ function entryToBook(entry, feedUrl) {
+         raw: entry.unparsed
+     };
+ }
++function extractPublicationType(rawEntry) {
++    var _a, _b, _c, _d;
++    var rawSeries = (rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry["schema:Series"]) || (rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry["schema:series"]);
++    var rawSeriesAttributes = (_a = rawSeries === null || rawSeries === void 0 ? void 0 : rawSeries[0]) === null || _a === void 0 ? void 0 : _a["$"];
++    var rawPublicationType = ((_b = rawSeriesAttributes === null || rawSeriesAttributes === void 0 ? void 0 : rawSeriesAttributes["simplified:publicationType"]) === null || _b === void 0 ? void 0 : _b.value)
++        || ((_c = rawSeriesAttributes === null || rawSeriesAttributes === void 0 ? void 0 : rawSeriesAttributes["simplified:publicationtype"]) === null || _c === void 0 ? void 0 : _c.value);
++    if (rawPublicationType) {
++        return rawPublicationType;
++    }
++    var belongsTo = rawEntry === null || rawEntry === void 0 ? void 0 : rawEntry.metadata.belongsTo;
++    for (var _i = 0, _e = ["magazine", "journal", "newspaper", "periodical", "series"]; _i < _e.length; _i++) {
++        var key = _e[_i];
++        if ((_d = belongsTo === null || belongsTo === void 0 ? void 0 : belongsTo[key]) !== null && _d !== void 0 ? _d : false) {
++            return key;
++        }
++    }
++    return undefined;
++}
+ function entryToLink(entry, feedUrl) {
+     var links = entry.links;
+     if (links.length > 0) {
+
+diff --git a/node_modules/@thepalaceproject/web-opds-client/lib/interfaces.d.ts b/node_modules/@thepalaceproject/web-opds-client/lib/interfaces.d.ts
+index 282fac1..8573e62 100644
+--- a/node_modules/@thepalaceproject/web-opds-client/lib/interfaces.d.ts
++++ b/node_modules/@thepalaceproject/web-opds-client/lib/interfaces.d.ts
+@@ -14,6 +14,7 @@ export interface BookData {
+     series?: {
+         name: string;
+         position?: number;
++        publicationType?: string;
+     } | null;
+     authors?: string[];
+     contributors?: string[];

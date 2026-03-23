@@ -85,14 +85,55 @@ export default function CatalogPage(props: CatalogPageProps) {
   function expandBookUrl(url: string): string {
     if (url) {
       const cleanUrl = cleanRelativePath(url);
-      const library = getLibrary(null, cleanUrl);
-      return (
-        document.location.origin +
-        "/" +
-        library +
-        "/works/" +
-        cleanUrl.replace(library + "/", "")
-      );
+      const library =
+        getLibrary(props.params.collectionUrl, null) ||
+        getLibrary(null, cleanUrl);
+      if (!library) {
+        return `${document.location.origin}/${cleanUrl}`;
+      }
+
+      const segments = cleanUrl.split("/").filter(Boolean);
+      const normalizedSegments =
+        segments[0] === library ? segments.slice(1) : segments;
+
+      // Periodical and borrowed items can link to /works/:id/fulfill/:loan.
+      // Book details routes expect the canonical /works/:id URL.
+      if (
+        normalizedSegments[0] === "works" &&
+        normalizedSegments.includes("fulfill")
+      ) {
+        const fulfillIndex = normalizedSegments.indexOf("fulfill");
+        const workIdSegments = normalizedSegments.slice(1, fulfillIndex);
+        return `${
+          document.location.origin
+        }/${library}/works/${workIdSegments.join("/")}`;
+      }
+
+      if (normalizedSegments[0] === "works" && normalizedSegments.length > 1) {
+        const workIdSegments = normalizedSegments.slice(1);
+        return `${
+          document.location.origin
+        }/${library}/works/${workIdSegments.join("/")}`;
+      }
+
+      // Some feeds expose borrowed periodicals as bare "{workId}/fulfill/{loanId}" IDs.
+      // Normalize those to their canonical work URL.
+      if (
+        normalizedSegments.length >= 3 &&
+        normalizedSegments[1] === "fulfill"
+      ) {
+        return `${document.location.origin}/${library}/works/${normalizedSegments[0]}`;
+      }
+
+      if (normalizedSegments.length === 1) {
+        const id = normalizedSegments[0];
+        const prefixedId = id.startsWith("urn:") ? `URI/${id}` : id;
+        return `${document.location.origin}/${library}/works/${prefixedId}`;
+      }
+
+      return `${
+        document.location.origin
+      }/${library}/works/${normalizedSegments.join("/")}`;
     } else {
       return url;
     }
