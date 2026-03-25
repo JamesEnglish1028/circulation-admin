@@ -29,7 +29,7 @@ export class PatronAuthServices extends EditableConfigList<
   extraFormKey = "neighborhood_mode";
   listDataKey = "patron_auth_services";
   itemTypeName = "patron authentication service";
-  urlBase = "/admin/web/config/patronAuth/";
+  urlBase = "/admin/web/config/patronAuthServices/";
   identifierKey = "id";
   labelKey = "protocol";
   links = this.renderLinks();

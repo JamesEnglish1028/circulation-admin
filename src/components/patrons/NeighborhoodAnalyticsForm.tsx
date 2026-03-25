@@ -65,11 +65,7 @@ export default class NeighborhoodAnalyticsForm extends React.Component<
           onChange={this.handleNeighborhoodChange}
         >
           {setting.options.map((o) => (
-            <option
-              key={o.key}
-              value={o.key}
-              aria-selected={o.key === this.props.currentValue}
-            >
+            <option key={o.key} value={o.key}>
               {o.label}
             </option>
           ))}
@@ -87,11 +83,11 @@ export default class NeighborhoodAnalyticsForm extends React.Component<
   getPairedService(setting: SettingData): string[] {
     // Whichever type of service we're currently dealing with--patron authentication or analytics--we need to provide a link to the other one.
     const services = {
-      patronAuth: "patron authentication",
+      patronAuthServices: "patron authentication",
       analytics: "local analytics",
     };
     const targetService =
-      setting.key === "location_source" ? "patronAuth" : "analytics";
+      setting.key === "location_source" ? "patronAuthServices" : "analytics";
     const url = "/admin/web/config/" + targetService;
     const name = services[targetService] + " service configuration settings";
     return [url, name];
