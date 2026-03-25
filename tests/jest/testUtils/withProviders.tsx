@@ -2,9 +2,10 @@ import * as React from "react";
 import { Provider, ProviderProps } from "react-redux";
 import ContextProvider, {
   ContextProviderProps,
-} from "../../../src/components/ContextProvider";
+} from "../../../src/components/layout/ContextProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, RenderOptions, RenderResult } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { defaultFeatureFlags } from "../../../src/utils/featureFlags";
 import { store } from "../../../src/store";
 import { ConfigurationSettings } from "../../../src/interfaces";
@@ -52,13 +53,15 @@ export const componentWithProviders = ({
     ...reduxProviderProps.store, // Context and Redux Provider stores must match.
   } as ContextProviderProps;
   const wrapper = ({ children }) => (
-    <Provider {...reduxProviderProps}>
-      <ContextProvider {...effectiveContextProviderProps}>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </ContextProvider>
-    </Provider>
+    <MemoryRouter>
+      <Provider {...reduxProviderProps}>
+        <ContextProvider {...effectiveContextProviderProps}>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </ContextProvider>
+      </Provider>
+    </MemoryRouter>
   );
   wrapper.displayName = "TestWrapperComponent";
   return wrapper;

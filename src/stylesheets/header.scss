@@ -1,131 +1,668 @@
-.palace {
-  .navbar-default, .navbar-collapse {
-    background-color: $white;
-    color: $dark;
+// sass-lint:disable no-important
+// Only target the Catalog dropdown in the tab row for rectangular, backgroundless style
+.site-nav--tabs .site-nav__links > li.site-nav__dropdown > button.catalog-dropdown-toggle {
+  border-radius: 0 !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-secondary) !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  height: 36px !important;
+  padding: 0 18px !important;
+  min-width: 88px !important;
+  border-bottom: 3px solid transparent !important;
+  transition: color 0.15s, border-color 0.15s !important;
+}
+.site-nav--tabs .site-nav__links > li.site-nav__dropdown > button.catalog-dropdown-toggle:hover,
+.site-nav--tabs .site-nav__links > li.site-nav__dropdown > button.catalog-dropdown-toggle:active,
+.site-nav--tabs .site-nav__links > li.site-nav__dropdown > button.catalog-dropdown-toggle:focus,
+.site-nav--tabs .site-nav__links > li.site-nav__dropdown > button.catalog-dropdown-toggle:focus-visible {
+  background: none !important;
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--nav-link-border) !important;
+  box-shadow: none !important;
+}
+.site-nav--tabs .site-nav__links > li.site-nav__dropdown > button.catalog-dropdown-toggle.active-link {
+  color: var(--nav-link-active-fg) !important;
+  border-bottom-color: var(--nav-link-active-border) !important;
+  background: none !important;
+  box-shadow: 0 2px 0 0 var(--nav-link-active-border) !important;
+  z-index: 1 !important;
+}
+// Tab color variables (override as needed)
+:root {
+  --nav-link-active-fg: #1D4ED8;
+  --nav-link-active-border: #2563EB;
+  --nav-link-active-bg: transparent;
+  --nav-link-hover-bg: transparent;
+  --nav-link-border: #CBD5E1;
+  --nav-link-bg: transparent;
+}
+// ─── Brand bar (logo row) ─────────────────────────────────────────────────────
+
+.site-nav__brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  background-color: var(--surface-elevated-bg);
+  border-bottom: 1px solid var(--border-soft-color);
+}
+
+.site-nav__brand .site-nav__logo {
+  display: block;
+  flex-shrink: 0;
+  height: 52px;
+  width: auto;
+  max-width: 400px;
+  max-height: 52px;
+  object-fit: contain;
+}
+
+// ─── Shared dropdown trigger button (user, library, config) ─────────────────
+
+.site-nav__brand-user {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+// Single unified style for ALL header dropdown buttons
+.site-nav__dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 0;
+  color: var(--text-secondary);
+  font-size: 0.825rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.06);
   }
 
-  .navbar-nav > li {
-    & > a,
-    & > button {
-      color: $dark;
+  &:active {
+    background-color: rgba(0, 0, 0, 0.12);
+    box-shadow: none;
+  }
 
-      &:hover, &:active, &:focus {
-        @include headerNavLink;
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+  }
+}
+
+// Icon / label helpers shared across all dropdown buttons
+.site-nav__dropdown-btn .site-nav__user-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  color: $dark;
+}
+
+.site-nav__user-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background-color: rgba(37, 99, 235, 0.12);
+  color: #1D4ED8;
+}
+
+.site-nav__user-icon-wrap .site-nav__user-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.site-nav__config-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background-color: rgba(37, 99, 235, 0.12);
+  color: #1D4ED8;
+}
+
+.site-nav__user-caret {
+  font-size: 0.75rem;
+  opacity: 0.55;
+  line-height: 1;
+  margin-left: auto;   // pushes caret to far right when label is flexible
+}
+
+.site-nav__user-email {
+  font-size: 0.85rem;
+  font-weight: 600;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ─── Site Nav base + row modifiers ───────────────────────────────────────────
+//
+//  Row 2  .site-nav.site-nav--controls  → library selector (left) + config (right)
+//  Row 3  .site-nav.site-nav--tabs      → page nav tab links only
+//
+.site-nav {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  min-height: 52px;
+  padding: 0;
+  background-color: var(--surface-elevated-bg);
+  color: $dark;
+  border-bottom: 1px solid var(--border-soft-color);
+  border-radius: 0;
+
+  .palace & {
+    margin-bottom: 0;
+  }
+}
+
+// Row 2 modifier — no extra overrides needed; .site-nav base handles it
+.site-nav--controls {
+  align-items: center;   // center library picker + config button vertically
+}
+
+// Row 3 modifier — tabs row sits below controls row
+.site-nav--tabs {
+  min-height: 36px;
+  background-color: transparent;
+}
+
+// ─── Inner layout container (consistent side gutters) ───────────────────────
+
+.site-nav__inner {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.site-nav__inner--brand {
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.site-nav__inner--controls {
+  gap: 12px;
+  padding: 8px 0;
+  justify-content: space-between;
+}
+
+.site-nav__inner--tabs {
+  padding: 6px 0;
+}
+
+// ─── Controls-end: right-aligned config area in row 2 ────────────────────────
+
+.site-nav__controls-end {
+  display: flex;
+  align-items: stretch;
+  margin-left: auto;
+
+  // The ul inside controls-end should have no left margin offset
+  > .site-nav__links {
+    margin-left: 0;
+  }
+}
+
+// ─── Header (library picker + mobile toggle) ──────────────────────────────────
+
+.site-nav__header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  padding: 0;
+  margin-right: 0;
+
+  .form-group {
+    margin: 0;
+  }
+}
+
+// ─── Library selector icon / label helpers ───────────────────────────────────
+
+.site-nav__dropdown-btn .site-nav__library-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--text-primary);
+  pointer-events: none;
+}
+
+.site-nav__dropdown-btn--library {
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.site-nav__dropdown-btn--library:hover {
+  background-color: var(--surface-hover-bg);
+  border-color: var(--border-color);
+}
+
+.site-nav__library-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background-color: rgba(37, 99, 235, 0.12);
+  color: #1D4ED8;
+}
+
+.site-nav__dropdown-btn--library .site-nav__library-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.site-nav__library-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  pointer-events: none;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ─── Mobile toggle button ─────────────────────────────────────────────────────
+
+.site-nav__toggle {
+  display: none; // hidden on desktop
+  padding: 9px 10px;
+  background-color: transparent;
+  background-image: none;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.site-nav__toggle-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: #64748B;
+
+  + .site-nav__toggle-bar {
+    margin-top: 4px;
+  }
+}
+
+// ─── Collapsible menu area ────────────────────────────────────────────────────
+
+.site-nav__menu {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  overflow-x: visible;
+  padding: 0;
+}
+
+// ─── Nav link lists ───────────────────────────────────────────────────────────
+
+.site-nav__links {
+  display: flex;
+  align-items: stretch;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0 3px;
+  gap: 8px;
+
+  &.site-nav__links--right {
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  > li {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+
+    > a,
+    > button {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      white-space: nowrap;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;               // flush with nav container bottom border
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+
+      &:hover {
+        color: var(--text-primary);
+        border-bottom-color: var(--border-color);
+        background: transparent;
+      }
+
+      &:active {
+        color: var(--nav-link-active-fg);
+        border-bottom-color: var(--nav-link-active-border);
+        background: transparent;
+        box-shadow: none;
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &:focus-visible {
+        outline: none;
+        box-shadow: none;
       }
     }
   }
 }
 
-.navbar-default {
-  padding: 3px 0;
-  border-radius: 0;
+// ─── Individual link items ────────────────────────────────────────────────────
 
-  .container-fluid {
-    padding: 24px 0 15px 15px;
-  }
+.site-nav__links .header-link {
+  display: flex;
+  align-items: stretch;
 
-  .navbar-header {
-    padding-left: 10px;
-
-    > img {
-      height: 64px;
-      width: auto;
-      margin: -12px 20px 0 0;
-      vertical-align: top;
-    }
-
-    .form-group {
-      display: inline-block;
-      margin-top: 6px;
-      margin-bottom: 0;
-    }
-
-    .form-control {
-      display: inline-block;
-      width: auto;
-    }
-  }
-
-  .navbar-nav {
-    margin-left: 3px;
-
-    .dropdown {
-      > button {
-        color: $dark;
-        padding: 13px 10px;
-        margin: 0;
-
-        svg {
-          transform: rotate(270deg);
-          fill: $dark;
-          height: 0.9em;
-        }
-
-        &:focus {
-          @include basic-focus;
-        }
-      }
-    }
-
-    .dropdown-menu {
-      display: block;
-      background-color: $pagecolorlight;
-      left: auto;
-      right: 0;
-      padding-bottom: 0;
-
-      .permissions, a {
-        padding: 5px;
-      }
-
-      a {
-        background-color: $white;
-
-        &:focus {
-          @include basic-focus;
-        }
-
-        &:hover, &:active, &:focus {
-          @include headerNavLink;
-        }
-      }
-    }
-  }
-
-  .menu .header-link a {
-    padding-left: 5px;
-    padding-right: 5px;
-  }
-
-  .pull-right {
+  a {
     display: flex;
-    justify-content: flex-end;
-    max-width: 50%;
-    min-width: 30%;
-  }
+    align-items: center;
+    text-decoration: none;
 
-  .navbar-collapse {
-    padding: 0;
+    // Active tab: blue bottom border + blue text
+    &.active-link {
+      color: var(--nav-link-active-fg);
+      border-bottom-color: var(--nav-link-active-border);
+    }
 
-    &.in {
-      overflow-y: visible;
+    &:hover {
+      color: var(--text-primary);
+      border-bottom-color: var(--border-color);
+      background: transparent;
+    }
+
+    &:active {
+      color: var(--nav-link-active-fg);
+      border-bottom-color: var(--nav-link-active-border);
+      background: transparent;
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
     }
   }
 
-  .nav {
-    .header-link {
-      a {
-        text-decoration: none;
+  &.active a {
+    color: var(--nav-link-active-fg);
+    border-bottom-color: var(--nav-link-active-border);
+  }
+}
 
-        &.active-link,
-        &:hover,
-        &:focus {
-          @include headerNavLink;
-        }
-      }
-      &.active a {
-        @include headerNavLink;
-      }
+// ─── Dropdown wrapper + unified menu ─────────────────────────────────────────
+
+.site-nav__dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.site-nav__dropdown-menu {
+  display: block;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1000;
+  min-width: 180px;
+  padding: 12px 14px;
+  margin: 0;
+  list-style: none;
+  background-color: var(--surface-elevated-bg);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+
+  // Permissions label — dimmed header row at top of account menu
+  .permissions {
+    display: block;
+    padding: 6px 10px 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border-soft-color);
+    margin-bottom: 6px;
+  }
+
+  // All interactive items — links AND buttons get identical treatment
+  li {
+    padding: 3px 0;
+  }
+
+  li > a,
+  li > button,
+  li > .library-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+    transition: background-color 0.1s ease, color 0.1s ease;
+    border-radius: 8px;
+
+    &:hover {
+      background-color: var(--surface-hover-bg);
+      color: var(--text-primary);
+    }
+
+    &:active {
+      background-color: var(--surface-muted-bg);
+      color: var(--text-primary);
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.4);
+      border-radius: 4px;
+    }
+  }
+
+  // Active / selected item (e.g. currently selected library)
+  li.active > a,
+  li.active > button {
+    font-weight: 600;
+    color: var(--nav-link-active-fg);
+    background-color: var(--nav-link-active-bg);
+  }
+}
+
+// ─── Row-specific polish ─────────────────────────────────────────────────────
+
+.site-nav--controls {
+  .site-nav__dropdown-btn {
+    background-color: transparent;
+    border: 1px solid transparent;
+    box-shadow: none;
+
+    &:hover {
+      background-color: var(--surface-hover-bg);
+      border-color: var(--border-color);
+    }
+  }
+}
+
+.site-nav__brand-user .site-nav__dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+.site-nav--tabs .site-nav__links {
+  gap: 6px;
+
+  > li > a {
+    height: 36px;
+    padding: 0 18px;
+    min-width: 88px;
+    justify-content: center;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    background: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  > li > a.active-link {
+    color: var(--nav-link-active-fg);
+    border-bottom-color: var(--nav-link-active-border);
+    background: var(--nav-link-active-bg);
+    box-shadow: 0 2px 0 0 var(--nav-link-active-border);
+    z-index: 1;
+  }
+
+  > li > a:hover {
+    color: var(--text-primary);
+    border-bottom-color: var(--nav-link-border);
+    background: none;
+  }
+
+  // Catalog dropdown button — same pill style as the link tabs
+  > li > button {
+    height: 36px;
+    padding: 0 18px;
+    min-width: 88px;
+    justify-content: center;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: none;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+
+    &:hover {
+      color: var(--text-primary);
+      border-bottom-color: var(--nav-link-border);
+      background: var(--nav-link-hover-bg);
+    }
+    &.active-link {
+      color: var(--nav-link-active-fg);
+      border-bottom-color: var(--nav-link-active-border);
+      background: none;
+      box-shadow: 0 2px 0 0 var(--nav-link-active-border);
+      z-index: 1;
+    }
+  }
+
+  > li.active > button {
+    color: var(--nav-link-active-fg);
+    border-bottom-color: var(--nav-link-active-border);
+    background: none;
+  }
+}
+
+// Override base dropdown-btn reset for tab-row pill buttons
+.site-nav__tab-btn.site-nav__dropdown-btn {
+  height: 36px;
+  padding: 0 18px;
+  min-width: 88px;
+  justify-content: center;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: none;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: var(--text-primary);
+    border-bottom-color: var(--nav-link-border);
+    background: none;
+  }
+
+  &.active-link {
+    color: var(--nav-link-active-fg);
+    border-bottom-color: var(--nav-link-active-border);
+    background: none;
+    box-shadow: 0 2px 0 0 var(--nav-link-active-border);
+    z-index: 1;
+  }
+}
+
+.site-nav--tabs .site-nav__links > li.active > .site-nav__tab-btn {
+  color: var(--nav-link-active-fg);
+  border-bottom-color: var(--nav-link-active-border);
+  background: none;
+}
+
+// ─── Mobile breakpoint ────────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  .site-nav__toggle {
+    display: block;
+  }
+
+  .site-nav__menu {
+    display: none;
+    width: 100%;
+
+    &.open {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 }

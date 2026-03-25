@@ -1,0 +1,119 @@
+import customListDetails from "../../../src/reducers/customListDetails";
+import ActionCreator from "../../../src/actions";
+
+describe("customListDetails reducer", () => {
+  const initState = {
+    data: null,
+    isFetching: false,
+    isEditing: false,
+    fetchError: null,
+    formError: null,
+    responseBody: null,
+    successMessage: null,
+    isLoaded: false,
+  };
+
+  it("returns initial state for unrecognized action", () => {
+    expect(customListDetails(undefined, {} as any)).toEqual(initState);
+  });
+
+  it("handles CUSTOM_LIST_DETAILS_REQUEST", () => {
+    const action = {
+      type: `${ActionCreator.CUSTOM_LIST_DETAILS}_REQUEST`,
+      url: "test url",
+    };
+
+    const newState = Object.assign({}, initState, { isFetching: true });
+    expect(customListDetails(initState, action)).toEqual(newState);
+  });
+
+  it("handles CUSTOM_LIST_DETAILS_MORE_REQUEST", () => {
+    const action = {
+      type: `${ActionCreator.CUSTOM_LIST_DETAILS_MORE}_REQUEST`,
+      url: "test url",
+    };
+
+    const oldState = {
+      url: "test url",
+      data: null,
+      isFetching: false,
+      isFetchingMoreEntries: false,
+      fetchError: null,
+      editError: null,
+      isLoaded: true,
+      isEditing: false,
+    };
+
+    const newState = Object.assign({}, oldState, {
+      isFetchingMoreEntries: true,
+      isLoaded: false,
+    });
+
+    expect(customListDetails(oldState as any, action)).toEqual(newState);
+  });
+
+  it("handles CUSTOM_LIST_DETAILS_MORE_LOAD", () => {
+    const action = {
+      type: `${ActionCreator.CUSTOM_LIST_DETAILS_MORE}_LOAD`,
+      data: {
+        id: "1",
+        url: "url",
+        books: [
+          { id: "4", title: "4" },
+          { id: "5", title: "5" },
+          { id: "6", title: "6" },
+        ],
+        nextPageUrl: "nextpage?after=100",
+        navigationLinks: [],
+        lanes: [],
+      },
+    };
+
+    const oldState = {
+      url: "test url",
+      data: {
+        id: "1",
+        url: "url",
+        title: "custom list",
+        books: [
+          { id: "1", title: "1" },
+          { id: "2", title: "2" },
+          { id: "3", title: "3" },
+        ],
+        nextPageUrl: "nextpage?after=50",
+        navigationLinks: [],
+        lanes: [],
+      },
+      isFetching: false,
+      isFetchingMoreEntries: false,
+      fetchError: null,
+      editError: null,
+      isLoaded: true,
+      isEditing: false,
+    };
+
+    const newState = Object.assign({}, oldState, {
+      data: {
+        id: "1",
+        url: "url",
+        title: "custom list",
+        books: [
+          { id: "1", title: "1" },
+          { id: "2", title: "2" },
+          { id: "3", title: "3" },
+          { id: "4", title: "4" },
+          { id: "5", title: "5" },
+          { id: "6", title: "6" },
+        ],
+        nextPageUrl: "nextpage?after=100",
+        navigationLinks: [],
+        lanes: [],
+      },
+      isFetching: false,
+      isFetchingMoreEntries: false,
+      isLoaded: true,
+    });
+
+    expect(customListDetails(oldState as any, action)).toEqual(newState);
+  });
+});

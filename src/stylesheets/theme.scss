@@ -1,0 +1,295 @@
+// =============================================================================
+// theme.scss — Palace admin design tokens
+//
+// CSS custom properties are defined as HSL channel values (without the hsl()
+// wrapper) so Tailwind can compose them with arbitrary opacity modifiers:
+//   bg-primary/50 → background-color: hsl(var(--primary) / 0.5)
+//
+// Values are derived from the Palace brand palette defined in colors.scss.
+// Semantic token names follow the shadcn/ui convention so that Tailwind utility
+// classes like `bg-primary`, `text-foreground`, `border-border` etc. resolve
+// to brand-appropriate colors automatically.
+//
+// A `.dark` block is included for future dark mode support; toggle it by
+// adding the class `dark` to the `<html>` element.
+// =============================================================================
+// sass-lint:disable property-sort-order
+
+:root {
+  // ── Neutrals ───────────────────────────────────────────────────────────────
+  --background:             0   0% 100%;   // white
+  --foreground:            60  19%   3%;   // #080807 dark-gray
+
+  // ── Primary — Palace dark blue #242DAB ────────────────────────────────────
+  --primary:              236  65%  41%;
+  --primary-foreground:     0   0% 100%;   // white
+
+  // ── Secondary — Palace light blue #46BBE5 ─────────────────────────────────
+  --secondary:            196  75%  59%;
+  --secondary-foreground: 236  65%  41%;   // dark blue for legibility
+
+  // ── Accent — Palace green #008918 ─────────────────────────────────────────
+  --accent:               131 100%  27%;
+  --accent-foreground:      0   0% 100%;   // white
+
+  // ── Destructive — Palace red #D0343A ──────────────────────────────────────
+  --destructive:          358  62%  51%;
+  --destructive-foreground: 0   0% 100%;   // white
+
+  // ── Muted — gray-tint #F5F5F4 ─────────────────────────────────────────────
+  --muted:                 60   5%  96%;
+  --muted-foreground:       0   0%  67%;   // #AAAAAA medium-dark-gray
+
+  // ── Card ───────────────────────────────────────────────────────────────────
+  --card:                   0   0% 100%;
+  --card-foreground:       60  19%   3%;
+
+  // ── Popover ────────────────────────────────────────────────────────────────
+  --popover:                0   0% 100%;
+  --popover-foreground:    60  19%   3%;
+
+  // ── Chrome ─────────────────────────────────────────────────────────────────
+  --border:                 0   0%  80%;   // #CCCCCC gray-border
+  --input:                  0   0%  80%;   // #CCCCCC gray-border
+  --ring:                 232  45%  59%;   // #6875C5 palace blue (tinted)
+
+  // ── Shape ──────────────────────────────────────────────────────────────────
+  --radius: 0.375rem;                      // matches Tailwind `rounded` (6px)
+
+  // ── UI Theme Tokens (MeBooks-style light theme) ────────────────────────────
+  --app-bg: #FFFFFF;
+  --app-fg: #0F172A;
+  --surface-bg: rgba(255, 255, 255, 0.88);
+  --surface-elevated-bg: #FFFFFF;
+  --surface-muted-bg: rgba(226, 232, 240, 0.65);
+  --surface-hover-bg: rgba(226, 232, 240, 0.95);
+  --border-color: rgba(203, 213, 225, 0.72);
+  --border-soft-color: rgba(203, 213, 225, 0.42);
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --nav-link-bg: rgba(14, 165, 233, 0.1);
+  --nav-link-hover-bg: rgba(14, 165, 233, 0.16);
+  --nav-link-border: rgba(14, 165, 233, 0.22);
+  --nav-link-fg: #0F172A;
+  --nav-link-active-bg: rgba(14, 165, 233, 0.2);
+  --nav-link-active-border: rgba(2, 132, 199, 0.38);
+  --nav-link-active-fg: #082F49;
+  --button-primary-bg: #2563EB;
+  --button-primary-hover-bg: #1D4ED8;
+  --button-primary-fg: #EFF6FF;
+  --button-primary-disabled-bg: rgba(226, 232, 240, 0.95);
+  --button-primary-disabled-fg: #64748B;
+  --button-secondary-bg: #CBD5E1;
+  --button-secondary-hover-bg: #94A3B8;
+  --button-secondary-fg: #0F172A;
+  --button-secondary-disabled-bg: rgba(226, 232, 240, 0.95);
+  --button-secondary-disabled-fg: #64748B;
+
+  // ── Input ──────────────────────────────────────────────────────────────────
+  --input-bg: #FFFFFF;
+  --input-fg: #0F172A;
+
+  // ── Status ─────────────────────────────────────────────────────────────────
+  --status-success-bg: rgba(16, 185, 129, 0.12);
+  --status-success-border: rgba(16, 185, 129, 0.28);
+  --status-success-fg: #166534;
+  --status-warning-bg: rgba(245, 158, 11, 0.12);
+  --status-warning-border: rgba(245, 158, 11, 0.28);
+  --status-warning-fg: #92400E;
+  --status-danger-bg: rgba(239, 68, 68, 0.12);
+  --status-danger-border: rgba(239, 68, 68, 0.28);
+  --status-danger-fg: #991B1B;
+  --status-info-bg: rgba(59, 130, 246, 0.12);
+  --status-info-border: rgba(59, 130, 246, 0.28);
+  --status-info-fg: #1D4ED8;
+
+  // ── Accent soft ────────────────────────────────────────────────────────────
+  --accent-soft-bg: rgba(37, 99, 235, 0.1);
+  --accent-soft-border: rgba(37, 99, 235, 0.24);
+  --accent-text: #1E3A8A;
+  --accent-text-emphasis: #1D4ED8;
+
+  // ── Slider ─────────────────────────────────────────────────────────────────
+  --slider-track: rgba(148, 163, 184, 0.9);
+}
+
+// Dark mode — applied when the `dark` class is on <html>.
+// Values can be refined once a visual design for dark mode is agreed upon.
+.dark {
+  --background:            60  19%   3%;
+  --foreground:             0   0% 100%;
+
+  --primary:              236  65%  65%;
+  --primary-foreground:    60  19%   3%;
+
+  --secondary:            196  75%  35%;
+  --secondary-foreground:   0   0% 100%;
+
+  --accent:               131  60%  40%;
+  --accent-foreground:      0   0% 100%;
+
+  --destructive:          358  62%  42%;
+  --destructive-foreground: 0   0% 100%;
+
+  --muted:                 60  19%  12%;
+  --muted-foreground:       0   0%  60%;
+
+  --card:                  60  19%   6%;
+  --card-foreground:        0   0% 100%;
+
+  --popover:               60  19%   6%;
+  --popover-foreground:     0   0% 100%;
+
+  --border:                 0   0%  25%;
+  --input:                  0   0%  25%;
+  --ring:                 232  45%  59%;
+
+  // ── UI theme tokens (dark) ─────────────────────────────────────────────────
+  --app-bg: #0F172A;
+  --app-fg: #F8FAFC;
+  --surface-bg: rgba(15, 23, 42, 0.7);
+  --surface-elevated-bg: #1E293B;
+  --surface-muted-bg: rgba(15, 23, 42, 0.45);
+  --surface-hover-bg: rgba(51, 65, 85, 0.85);
+  --border-color: rgba(100, 116, 139, 0.6);
+  --border-soft-color: rgba(100, 116, 139, 0.35);
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --input-bg: #0F172A;
+  --input-fg: #E2E8F0;
+  --status-success-bg: rgba(16, 185, 129, 0.14);
+  --status-success-border: rgba(16, 185, 129, 0.35);
+  --status-success-fg: #86EFAC;
+  --status-warning-bg: rgba(245, 158, 11, 0.14);
+  --status-warning-border: rgba(245, 158, 11, 0.35);
+  --status-warning-fg: #FCD34D;
+  --status-danger-bg: rgba(239, 68, 68, 0.14);
+  --status-danger-border: rgba(239, 68, 68, 0.35);
+  --status-danger-fg: #FCA5A5;
+  --status-info-bg: rgba(59, 130, 246, 0.14);
+  --status-info-border: rgba(59, 130, 246, 0.35);
+  --status-info-fg: #93C5FD;
+  --nav-link-bg: rgba(14, 165, 233, 0.1);
+  --nav-link-hover-bg: rgba(14, 165, 233, 0.18);
+  --nav-link-border: rgba(14, 165, 233, 0.24);
+  --nav-link-fg: #BAE6FD;
+  --nav-link-active-bg: rgba(14, 165, 233, 0.22);
+  --nav-link-active-border: rgba(56, 189, 248, 0.42);
+  --nav-link-active-fg: #E0F2FE;
+  --accent-soft-bg: rgba(14, 165, 233, 0.14);
+  --accent-soft-border: rgba(56, 189, 248, 0.36);
+  --accent-text: #BAE6FD;
+  --accent-text-emphasis: #E0F2FE;
+  --button-primary-bg: #0284C7;
+  --button-primary-hover-bg: #0369A1;
+  --button-primary-fg: #F8FAFC;
+  --button-primary-disabled-bg: rgba(51, 65, 85, 0.9);
+  --button-primary-disabled-fg: #94A3B8;
+  --button-secondary-bg: #334155;
+  --button-secondary-hover-bg: #475569;
+  --button-secondary-fg: #F8FAFC;
+  --button-secondary-disabled-bg: rgba(51, 65, 85, 0.7);
+  --button-secondary-disabled-fg: #94A3B8;
+  --slider-track: rgba(100, 116, 139, 0.75);
+}
+
+// =============================================================================
+// Base typography
+//
+// Moved here from bootstrap-compat.scss when Tailwind Preflight was enabled.
+// Values preserve Bootstrap 3 defaults to maintain visual parity with the
+// previous baseline.
+// =============================================================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #333;
+}
+
+// Scope default link colour to links that don't carry an explicit Tailwind
+// text-colour utility (e.g. text-white, text-blue-600).  Without the :not()
+// guard, this unlayered rule would beat any Tailwind @layer utilities colour.
+a:not([class*="text-"]) {
+  color: #337AB7;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: #23527C;
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+  }
+}
+
+// Headlines — Bootstrap 3 defaults; component SCSS overrides as needed.
+h1 { font-size: 36px; }
+h2 { font-size: 30px; }
+h3 { font-size: 24px; }
+h4 { font-size: 18px; }
+h5 { font-size: 14px; }
+h6 { font-size: 12px; }
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.1;
+  color: inherit;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+p  { margin: 0 0 10px; }
+
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #EEE;
+}
+
+ul,
+ol {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+pre {
+  display: block;
+  padding: 9.5px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.42857143;
+  word-break: break-all;
+  word-wrap: break-word;
+  color: #333;
+  background-color: #F5F5F5;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+}
+
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #C7254E;
+  background-color: #F9F2F4;
+  border-radius: 4px;
+}

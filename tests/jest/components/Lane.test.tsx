@@ -1,8 +1,7 @@
 import * as React from "react";
 import { render, screen } from "@testing-library/react";
-import { stub } from "sinon";
 import { LaneData } from "../../../src/interfaces";
-import Lane from "../../../src/components/Lane";
+import Lane from "../../../src/components/lanes/Lane";
 
 // Mock the Link component from React Router, so we can verify that it gets rendered with the
 // expected props. This serves as an example of how to do something analogous to Enzyme's shallow
@@ -10,8 +9,8 @@ import Lane from "../../../src/components/Lane";
 // test something. This technique is useful for testing components in isolation (unit testing),
 // instead of the integration testing that RTL focuses on.
 
-jest.mock("react-router", () => ({
-  ...jest.requireActual("react-router"),
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
   Link: (props) => (
     <div data-testid="Link" data-to={props.to}>
       {props.children}
@@ -19,8 +18,8 @@ jest.mock("react-router", () => ({
   ),
 }));
 
-const renderLanes = stub();
-const toggleLaneVisibility = stub();
+const renderLanes = jest.fn();
+const toggleLaneVisibility = jest.fn();
 
 function createLaneData(displayName: string, isAutomated: boolean): LaneData {
   return {

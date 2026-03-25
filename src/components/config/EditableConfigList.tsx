@@ -1,0 +1,436 @@
+import * as React from "react";
+import { Store } from "@reduxjs/toolkit";
+import { FetchErrorData } from "@thepalaceproject/web-opds-client/lib/interfaces";
+import { SettingData } from "../../interfaces";
+import { Alert } from "../ui/alert";
+import { RootState } from "../../store";
+import { Button } from "../ui";
+import LoadingIndicator from "@thepalaceproject/web-opds-client/lib/components/LoadingIndicator";
+import ErrorMessage from "../shared/ErrorMessage";
+import PencilIcon from "../icons/PencilIcon";
+import TrashIcon from "../icons/TrashIcon";
+import VisibleIcon from "../icons/VisibleIcon";
+import Admin from "../../models/Admin";
+
+export interface EditableConfigListStateProps<T> {
+  data?: T;
+  fetchError?: FetchErrorData;
+  formError?: FetchErrorData;
+  isFetching?: boolean;
+  responseBody?: string;
+  additionalData?: any;
+}
+
+export interface EditableConfigListDispatchProps<T> {
+  fetchData?: () => Promise<T>;
+  editItem?: (data: FormData) => Promise<void>;
+  deleteItem?: (identifier: string | number) => Promise<void>;
+}
+
+export interface EditableConfigListOwnProps {
+  store?: Store<RootState>;
+  csrfToken: string;
+  editOrCreate?: string;
+  identifier?: string;
+  settingUp?: boolean;
+  /** Injected via useAppContext() in the function wrapper (WithData component).
+   *  Replaces legacy contextTypes: { admin } — Phase 4 legacy context removal. */
+  admin?: Admin;
+}
+
+export interface EditableConfigListProps<T>
+  extends EditableConfigListStateProps<T>,
+    EditableConfigListDispatchProps<T>,
+    EditableConfigListOwnProps {}
+
+export interface EditFormProps<T, U> {
+  item?: U;
+  data: T;
+  additionalData?: any;
+  extraFormSection?: any;
+  extraFormKey?: string;
+  disabled: boolean;
+  save?: (data: FormData) => void;
+  urlBase: string;
+  listDataKey: string;
+  responseBody?: string;
+  error?: FetchErrorData;
+  adminLevel?: number;
+  settingUp?: boolean;
+  admin?: Admin;
+  registerLibrary?: (library: any, registrationStage?: string) => void;
+  importCollection?: (
+    collectionId: string | number,
+    force: boolean
+  ) => Promise<void>;
+}
+
+export interface AdditionalContentProps<T, U> {
+  store?: Store<RootState>;
+  csrfToken?: string;
+  item?: U;
+  type?: string;
+}
+
+export interface ExtraFormSectionProps<T, U> {
+  setting: SettingData;
+  disabled?: boolean;
+  error?: FetchErrorData;
+  currentValue?: string;
+}
+
+/** Shows a list of configuration services of a particular type and allows creating a new
+    service or editing or deleting an existing services. Used for many of the tabs on the
+    system configuration page.
+
+    GenericEditableConfigList allows subclasses to define additional props. Subclasses of
+    EditableConfigList cannot change the props and do not have to specify a type for them. */
+export abstract class GenericEditableConfigList<
+  T,
+  U,
+  V extends EditableConfigListProps<T>
+> extends React.Component<V> {
+  // HOC PATTERN: admin is injected as a prop via useAppContext() in the WithData
+  // wrapper functions, replacing the legacy contextTypes: { admin } API.
+  abstract EditForm: React.ComponentType<EditFormProps<T, U>>;
+  abstract listDataKey: string;
+  abstract itemTypeName: string;
+  abstract urlBase: string;
+  abstract identifierKey: string;
+  abstract labelKey: string;
+  adminLevel?: number;
+  limitOne = false;
+  links?: { [key: string]: JSX.Element };
+  AdditionalContent?: new (
+    props: AdditionalContentProps<T, U>
+  ) => React.Component<AdditionalContentProps<T, U>, any>;
+  ExtraFormSection?: new (
+    props: ExtraFormSectionProps<T, U>
+  ) => React.Component<ExtraFormSectionProps<T, U>, any>;
+  extraFormKey?: string;
+
+  constructor(props) {
+    super(props);
+    this.editItem = this.editItem.bind(this);
+    this.save = this.save.bind(this);
+    this.label = this.label.bind(this);
+    this.renderLi = this.renderLi.bind(this);
+  }
+
+  UNSAFE_componentWillMount() {
+    const { fetchData, isFetching } = this.props;
+
+    if (fetchData && !isFetching) {
+      fetchData();
+    }
+  }
+
+  render(): JSX.Element {
+    const headers = this.getHeaders();
+    // If not in edit or create mode and there is data, display the list.
+    const canListAllData =
+      !this.props.isFetching &&
+      !this.props.editOrCreate &&
+      this.props.data &&
+      this.props.data[this.listDataKey];
+    const EditForm = this.EditForm;
+    const ExtraFormSection = this.ExtraFormSection;
+    const itemToEdit = this.itemToEdit();
+    const canEditItem = itemToEdit && this.canEdit(itemToEdit);
+    return (
+      <div className={this.getClassName()}>
+        <h2 className="config-section-title">{headers["h2"]}</h2>
+        {canListAllData && this.links && this.links["info"] && (
+          <Alert variant="info" className="mb-4">
+            {this.links["info"]}
+          </Alert>
+        )}
+        {this.props.responseBody && this.props.editOrCreate && (
+          <Alert variant="success">{this.successMessage()}</Alert>
+        )}
+        {this.props.fetchError && !this.props.editOrCreate && (
+          <ErrorMessage error={this.props.fetchError} />
+        )}
+        {this.props.formError && this.props.editOrCreate && (
+          <ErrorMessage error={this.props.formError} />
+        )}
+        {this.props.isFetching && <LoadingIndicator />}
+        {canListAllData && (
+          <div className="list-container">
+            <header>
+              {(!this.limitOne ||
+                this.props.data[this.listDataKey].length === 0) &&
+                this.canCreate() && (
+                  <a
+                    className="create-item inline-flex items-center justify-center px-3 py-1.5 text-sm font-bold text-primary-foreground bg-primary rounded hover:bg-primary/80 transition-colors no-underline"
+                    href={this.urlBase + "create"}
+                  >
+                    Create new {this.itemTypeName}
+                  </a>
+                )}
+              <div>{this.props.data[this.listDataKey].length} configured</div>
+            </header>
+            <ul>
+              {this.props.data[this.listDataKey].map((item, index) =>
+                this.renderLi(item, index)
+              )}
+            </ul>
+          </div>
+        )}
+        {this.props.editOrCreate === "create" && (
+          <div>
+            <h3 className="config-section-title">{headers["h3"]}</h3>
+            <EditForm
+              data={this.props.data}
+              additionalData={this.props.additionalData}
+              disabled={this.props.isFetching}
+              save={this.save}
+              urlBase={this.urlBase}
+              listDataKey={this.listDataKey}
+              responseBody={this.props.responseBody}
+              error={this.props.formError}
+              extraFormSection={ExtraFormSection}
+              extraFormKey={this.extraFormKey}
+              adminLevel={this.getAdminLevel()}
+              settingUp={this.props.settingUp}
+              admin={this.props.admin}
+              registerLibrary={
+                (this as any).registerLibraryForEditForm ||
+                (this.props as any).registerLibrary
+              }
+              importCollection={
+                (this as any).importCollectionForEditForm ||
+                (this.props as any).importCollection
+              }
+            />
+          </div>
+        )}
+
+        {itemToEdit && (
+          <div>
+            <h3 className="config-section-title">
+              {canEditItem ? "Edit " : ""}
+              {this.label(itemToEdit)}
+            </h3>
+            <EditForm
+              item={itemToEdit}
+              data={this.props.data}
+              additionalData={this.props.additionalData}
+              disabled={!canEditItem || this.props.isFetching}
+              save={canEditItem ? this.save : undefined}
+              urlBase={this.urlBase}
+              listDataKey={this.listDataKey}
+              responseBody={this.props.responseBody}
+              error={this.props.formError}
+              extraFormSection={ExtraFormSection}
+              extraFormKey={this.extraFormKey}
+              adminLevel={this.getAdminLevel()}
+              settingUp={this.props.settingUp}
+              admin={this.props.admin}
+              registerLibrary={
+                (this as any).registerLibraryForEditForm ||
+                (this.props as any).registerLibrary
+              }
+              importCollection={
+                (this as any).importCollectionForEditForm ||
+                (this.props as any).importCollection
+              }
+            />
+          </div>
+        )}
+        {this.links && this.links["footer"] && <p>{this.links["footer"]}</p>}
+      </div>
+    );
+  }
+
+  renderLi(item, index): JSX.Element {
+    const AdditionalContent = this.AdditionalContent || null;
+
+    return (
+      <li key={index}>
+        <h3 className="font-semibold flex-1 m-0">{this.label(item)}</h3>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            className="edit-item inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-foreground border border-border rounded bg-background hover:bg-muted transition-colors no-underline [&_svg]:fill-current [&_svg]:h-3 [&_svg]:w-3"
+            href={this.urlBase + "edit/" + item[this.identifierKey]}
+          >
+            {this.canEdit(item) ? (
+              <>
+                Edit <PencilIcon />
+              </>
+            ) : (
+              <>
+                View <VisibleIcon />
+              </>
+            )}
+          </a>
+
+          {this.canDelete() && (
+            <Button
+              className="danger small !m-0 delete-item"
+              callback={() => this.delete(item)}
+              content={
+                <span className="inline-flex items-center gap-1.5">
+                  Delete <TrashIcon />
+                </span>
+              }
+            />
+          )}
+        </div>
+
+        {AdditionalContent && (
+          <AdditionalContent
+            type={this.itemTypeName}
+            item={item}
+            store={this.props.store}
+            csrfToken={this.props.csrfToken}
+          />
+        )}
+      </li>
+    );
+  }
+
+  label(item): string {
+    return item[this.labelKey];
+  }
+
+  getAdminLevel() {
+    let level;
+    if (this.props.admin?.isSystemAdmin()) {
+      level = 3;
+    } else if (this.props.admin?.isLibraryManagerOfSomeLibrary()) {
+      level = 2;
+    } else {
+      level = 1;
+    }
+    return level;
+  }
+
+  getHeaders() {
+    const h2 = `${this.getItemType()} configuration`;
+    const h3 = `Create a new ${this.itemTypeName}`;
+    return { h2, h3 };
+  }
+
+  getClassName(): string {
+    const className = this.AdditionalContent ? "has-additional-content" : "";
+    return className;
+  }
+
+  getItemType() {
+    return (
+      this.itemTypeName.slice(0, 1).toUpperCase() + this.itemTypeName.slice(1)
+    );
+  }
+
+  formatItemType() {
+    const itemType = this.getItemType();
+    const regexp = /^[A-Z]*$/;
+    // If the item's name started out in all caps--e.g. "CDN"--don't lowercase it.
+    const isAllCaps = regexp.test(itemType.split(" service")[0]);
+    const formattedItemType = isAllCaps ? itemType : itemType.toLowerCase();
+    return formattedItemType;
+  }
+
+  successMessage() {
+    let verb;
+    if (this.props.editOrCreate === "create") {
+      verb = "Successfully created ";
+      return (
+        <span>
+          {verb}
+          <a href={this.getLink()}>a new {this.formatItemType()}</a>
+        </span>
+      );
+    } else {
+      verb = "Successfully edited this ";
+      return (
+        <span>
+          {verb}
+          {this.formatItemType()}
+        </span>
+      );
+    }
+  }
+
+  getLink() {
+    return `${this.urlBase}edit/${this.props.responseBody}`;
+  }
+
+  /**
+   * canCreate
+   * Does this service have the ability to create a new item? The default is
+   * true but the logic can be overridden by other classes
+   * that inherit GenericEditableConfigList. For example, a class would only
+   * want to create a new item if the admin is a system admin.
+   */
+  canCreate() {
+    return true;
+  }
+
+  /**
+   * canDelete
+   * Does this service have the ability to delete an item? The default is
+   * true, as long as the user is a system admin, but the logic can be overridden by other classes
+   * that inherit GenericEditableConfigList.
+   */
+  canDelete() {
+    return this.getAdminLevel() === 3;
+  }
+
+  canEdit(item) {
+    // The server has the option to assign the item a level from 1 to 3, indicating what level of permissions
+    // the admin needs to have in order to be able to modify the item.
+    // (Currently, this is just being used to prevent librarians from modifying local analytics configurations.)
+    return !item.level || item.level <= this.getAdminLevel();
+  }
+
+  save(data: FormData) {
+    this.editItem(data).then(() => {
+      if (this.limitOne && this.props.editOrCreate === "create") {
+        // Wait for two seconds so that the user can see the success message,
+        // then go to the edit page
+        setTimeout(() => {
+          window.location.href = `${this.urlBase}edit/${this.props.responseBody}`;
+        }, 2000);
+      }
+    });
+  }
+
+  async editItem(data: FormData): Promise<void> {
+    // Scrolling to the top lets the user see the success or error message
+    window.scrollTo(0, 0);
+    await this.props.editItem(data);
+    this.props.fetchData();
+  }
+
+  itemToEdit(): U | null {
+    if (
+      this.props.editOrCreate === "edit" &&
+      this.props.data &&
+      this.props.data[this.listDataKey]
+    ) {
+      for (const item of this.props.data[this.listDataKey]) {
+        if (String(item[this.identifierKey]) === this.props.identifier) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  async delete(item: U): Promise<void> {
+    if (window.confirm(`Delete "` + this.label(item) + `"?`)) {
+      await this.props.deleteItem(item[this.identifierKey]);
+      this.props.fetchData();
+    }
+  }
+}
+
+export abstract class EditableConfigList<
+  T,
+  U
+> extends GenericEditableConfigList<T, U, EditableConfigListProps<T>> {}
+
+export default EditableConfigList;

@@ -1,0 +1,320 @@
+// ============================================================================
+// bootstrap-compat.scss
+//
+// Minimal CSS replacement for Bootstrap 3.
+// Provides structural & visual parity for every Bootstrap class still
+// referenced in our templates — so Mocha/Enzyme tests that select by these
+// class names continue to pass and the UI looks the same.
+//
+// Replace the old: @import "~bootstrap/dist/css/bootstrap.css"
+//
+// Only the classes actually used by this codebase are included.
+// Once the Mocha test suite is migrated to Jest we can drop the legacy class
+// names from templates and delete this file.
+// ============================================================================
+
+// ─── Screen-reader only ──────────────────────────────────────────────────────
+// NOTE: Box-model (*::before / *::after) and Base typography (body, a, headings,
+// p, hr, ul/ol, pre, code) have been moved to theme.scss.  They are applied
+// after Tailwind Preflight so the cascade order is identical to before.
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+// ─── Clearfix ────────────────────────────────────────────────────────────────
+// (global.scss also defines this; extra definition is harmless)
+.clearfix::before,
+.clearfix::after {
+  display: table;
+  content: '';
+}
+.clearfix::after {
+  clear: both;
+}
+
+// ─── Collapse (mobile nav toggle) ────────────────────────────────────────────
+.collapse {
+  display: none;
+
+  &.in {
+    display: block;
+  }
+}
+
+// Navbar rules removed — now owned by header.scss (.site-nav)
+
+// ─── Nav ─────────────────────────────────────────────────────────────────────
+.nav {
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+
+  > li {
+    display: block;
+    position: relative;
+
+    > a {
+      display: block;
+      position: relative;
+      padding: 10px 15px;
+
+      &:hover,
+      &:focus {
+        text-decoration: none;
+        background-color: #EEE;
+      }
+    }
+  }
+}
+
+// navbar-nav rules removed — now owned by header.scss (.site-nav__links)
+
+// Dropdown rules removed — now owned by header.scss (.site-nav__dropdown)
+
+// ─── Nav tabs ────────────────────────────────────────────────────────────────
+.nav-tabs {
+  border-bottom: 1px solid #DDD;
+
+  > li {
+    float: left;
+    margin-bottom: -1px;
+
+    > a {
+      margin-right: 2px;
+      line-height: 1.42857143;
+      border: 1px solid transparent;
+      border-radius: 4px 4px 0 0;
+
+      &:hover {
+        border-color: #EEE #EEE #DDD;
+        background-color: #EEE;
+      }
+    }
+
+    &.active > a,
+    &.active > a:hover,
+    &.active > a:focus {
+      color: #555;
+      cursor: default;
+      background-color: #FFF;
+      border: 1px solid #DDD;
+      border-bottom-color: transparent;
+    }
+  }
+
+  &::after {
+    clear: both;
+  }
+}
+
+.tab-content {
+  > .tab-pane {
+    display: none;
+  }
+  > .active {
+    display: block;
+  }
+}
+
+// ─── Forms ───────────────────────────────────────────────────────────────────
+
+// Tailwind Preflight strips all default fieldset/legend/label spacing.
+// These rules restore the visual breathing room that Bootstrap 3 provided.
+fieldset {
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+  border: none;
+  min-width: 0;
+}
+
+legend {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: inherit;
+  border: 0;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+// Ensure form labels are block-level with a small bottom gap so they sit
+// cleanly above their input rather than running into it.
+label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+// .form-group margin is now handled by the editable-input-group mb-4 Tailwind
+// class in EditableInput.tsx. Other components using .form-group directly still
+// get spacing via global.scss.
+
+.form-control {
+  display: block;
+  width: 100%;
+  height: 34px;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555;
+  background-color: #FFF;
+  background-image: none;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    border-color: #66AFE9;
+    outline: 0;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+  }
+}
+
+select.form-control {
+  height: 34px;
+  padding: 0 6px;
+}
+
+textarea.form-control {
+  height: auto;
+}
+
+.form-inline {
+  .form-control {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+  }
+
+  .form-group {
+    display: inline-block;
+    margin-bottom: 0;
+    vertical-align: middle;
+  }
+}
+
+// ─── Input group ─────────────────────────────────────────────────────────────
+.input-group {
+  display: table;
+  position: relative;
+  border-collapse: separate;
+  width: 100%;
+}
+
+.input-group-addon {
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1;
+  color: #555;
+  text-align: center;
+  background-color: #EEE;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+// ─── Buttons ─────────────────────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  text-decoration: none;
+
+  &:hover,
+  &:focus,
+  &:active {
+    text-decoration: none;
+  }
+
+  &:focus,
+  &.focus {
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+  }
+}
+
+// Provide a small gap between adjacent buttons so button rows don't feel cramped.
+.btn + .btn {
+  margin-left: 8px;
+}
+
+// ─── Container ───────────────────────────────────────────────────────────────
+// Only used as .container (page wrapper) and .container-fluid (header).
+.container {
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 15px;
+  padding-left: 15px;
+
+  @media (min-width: 768px) {
+    max-width: 750px;
+  }
+
+  @media (min-width: 992px) {
+    max-width: 970px;
+  }
+
+  @media (min-width: 1200px) {
+    max-width: 1170px;
+  }
+}
+
+.container-fluid {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+// ─── Typography helpers ───────────────────────────────────────────────────────
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #777;
+}
+
+.bg-warning {
+  background-color: #FCF8E3;
+}
+
+.bg-danger {
+  background-color: #F2DEDE;
+}
+
+.bg-success {
+  background-color: #DFF0D8;
+}
+
+// ─── Pull helpers ────────────────────────────────────────────────────────────
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
+}

@@ -28,6 +28,7 @@ export const normalizeStatistics = (
     name: "Summary Statistics",
     patronStatistics: statistics.patronSummary,
     inventorySummary: statistics.inventorySummary,
+    inventoryByMedium: statistics.inventoryByMedium,
     collectionIds,
     collections: statistics.collections,
   };

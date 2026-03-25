@@ -1,9 +1,10 @@
 import * as React from "react";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import IndividualAdminEditForm from "../../../src/components/IndividualAdminEditForm";
+import IndividualAdminEditForm from "../../../src/components/config/IndividualAdminEditForm";
 import renderWithContext from "../testUtils/renderWithContext";
 import { ConfigurationSettings } from "../../../src/interfaces";
+import Admin from "../../../src/models/Admin";
 
 describe("IndividualAdminEditForm", () => {
   it("clears the role checkboxes after save", async () => {
@@ -42,6 +43,8 @@ describe("IndividualAdminEditForm", () => {
       disabled: false,
       listDataKey: "",
       urlBase: "",
+      settingUp: false,
+      admin: new Admin([{ role: "system" }]),
     };
 
     const { rerender } = renderWithContext(

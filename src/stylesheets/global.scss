@@ -1,3 +1,47 @@
+// ─── Page transition fade-in ────────────────────────────────────────────────
+//
+// Each top-level page component has a distinct root class. When react-router
+// unmounts the old route and mounts the new one, the incoming page fades in
+// over 180 ms rather than flashing into view.
+
+@keyframes palace-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes palace-fade-in-opacity {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dashboard,
+.lane-page,
+.custom-list-page,
+.config,
+.account,
+.quicksight-dashboard,
+.troubleshooting-page,
+.welcome-page,
+.manage-patrons-page {
+  animation: palace-fade-in 0.18s ease-out both;
+}
+
+.catalog-page {
+  animation: palace-fade-in-opacity 0.12s ease-out both;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 .visuallyHidden {
   border: 0;
   clip: rect(0 0 0 0);
@@ -54,8 +98,16 @@
 
 .btn.danger {
   color: $white;
+  svg {
+    fill: $white;
+    width: 0.9em;
+    height: 0.9em;
+  }
   &:hover {
     color: $white;
+    svg {
+      fill: $white;
+    }
   }
 }
 
@@ -100,20 +152,21 @@ body > div {
   height: unset;
 }
 
+// Layout baseline moved to ui.scss for predictable layering.
+
 body > div.palace {
-  height: 100%;
+  min-height: 100vh;
+  height: auto;
 
   > div:first-child {
     position: relative;
     min-height: 100vh;
-    block-size: fit-content;
-    &:not(.config) main {
-      padding-bottom: 56px;
-      max-height: 78.5%;
-      block-size: fit-content;
-    }
-    &.config main {
-      block-size: fit-content;
+    height: auto;
+
+    main {
+      height: auto;
+      max-height: none;
+      padding-bottom: 0;
     }
   }
 }
@@ -121,4 +174,62 @@ body > div.palace {
 // overwriting rules from the web-opds-client for the complaints list view
 .collection .collection-container .collection-main {
   padding-bottom: 50px;
+}
+
+// Tailwind utility compat block removed — no longer needed.
+// @layer legacy in app.scss now gives all Tailwind utilities automatic priority
+// over the web-opds-client border-radius: 0 resets and Bootstrap element rules.
+
+// ─── .well / .config-instructions / .timestamp-* ────────────────────────────
+// Lightweight content card used by Timestamp and ProtocolFormField.
+// Replaces the Bootstrap .well definition; kept for test-selector compat.
+.well,
+.config-instructions,
+.timestamp-exception,
+.timestamp-achievements {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #F5F5F5;
+  border: 1px solid #E3E3E3;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+// ─── Table baseline ─────────────────────────────────────────────────────────
+// Applies to legacy Bootstrap tables and new UI tables for consistent density.
+.palace {
+  table,
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-soft-color);
+    vertical-align: top;
+  }
+
+  thead th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--surface-muted-bg);
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: var(--surface-muted-bg);
+  }
+}
+
+// ─── .form-group ─────────────────────────────────────────────────────────────
+// Several book/config/patrons components still use .form-group directly.
+// EditableInput now uses .editable-input-group + Tailwind mb-4 instead.
+// This rule keeps spacing for those remaining usages until they're migrated.
+.form-group {
+  margin-bottom: 15px;
 }

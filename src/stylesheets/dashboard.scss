@@ -1,7 +1,23 @@
+// sass-lint:disable no-important
 .dashboard {
   .body {
     height: 100%;
-    margin: 10px;
-    margin-top: 60px;
+    margin: 0;
+  }
+
+  // ─── Circulation Events section (below stat cards) ───────────────────────
+  // CirculationEventsDownload renders a bare <h2> + button; give it a
+  // card-like treatment so it doesn't float disconnected on the page.
+  main.body > h2 {
+    font-size: 0.9375rem !important;  // must beat unlayered Bootstrap h2:30px
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 20px 0 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-soft-color);
+  }
+
+  main.body > .btn.left-align {
+    margin-top: 4px;
   }
 }
