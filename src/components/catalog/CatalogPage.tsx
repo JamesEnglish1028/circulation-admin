@@ -109,6 +109,18 @@ export default function CatalogPage(props: CatalogPageProps) {
         }/${library}/works/${workIdSegments.join("/")}`;
       }
 
+      // Acquisition links can end with /borrow. Strip it to get the
+      // canonical /works/:id URL for book details navigation.
+      if (
+        normalizedSegments[0] === "works" &&
+        normalizedSegments[normalizedSegments.length - 1] === "borrow"
+      ) {
+        const workIdSegments = normalizedSegments.slice(1, -1);
+        return `${
+          document.location.origin
+        }/${library}/works/${workIdSegments.join("/")}`;
+      }
+
       if (normalizedSegments[0] === "works" && normalizedSegments.length > 1) {
         const workIdSegments = normalizedSegments.slice(1);
         return `${
